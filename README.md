@@ -1,4 +1,8 @@
-# `tonie-audio-match`: 1-click audio book upload to your [creative tonies](https://tonies.com)
+# tonie-audio-match
+
+Your 1-click audio book upload to your [creative tonies](https://tonies.com).
+
+# The Story
 
 It's bedtime for one of your kids, they are tired (just like you), their patience is down to a minimum.
 And now they want to hear their beloved audio book.

@@ -1,0 +1,4 @@
+Flask ~= 1.1.2
+Flask-Cors ~= 3.0.8
+requests ~= 2.24.0
+tinytag ~= 1.4.0

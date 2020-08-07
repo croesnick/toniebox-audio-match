@@ -1,0 +1,37 @@
+---
+version: '3.8'
+services:
+  frontend:
+    image: 'node:14.7-stretch'
+    command: >
+      bash -c "cd /frontend &&
+      npm run serve"
+    networks:
+      - toniebox
+    ports:
+      - ${TONIE_AUDIO_MATCH_FRONTEND_PORT:-80}:8080
+    volumes:
+      - ./client/:/frontend
+      - ./albumart/:/frontend/public/assets/covers
+
+  backend:
+    image: 'python:3.8-buster'
+    environment:
+      - TONIE_AUDIO_MATCH_MEDIA_PATH
+      - TONIE_AUDIO_MATCH_USER
+      - TONIE_AUDIO_MATCH_PASS
+    command: >
+      bash -c "cd /backend &&
+      pip install -r requirements.txt &&
+      python app.py"
+    networks:
+      - toniebox
+    ports:
+      - ${TONIE_AUDIO_MATCH_BACKEND_PORT:-8080}:5000
+    volumes:
+      - ./server/:/backend
+      - ./albumart/:/backend/assets/covers
+      - ${TONIE_AUDIO_MATCH_MEDIA_PATH}:/backend/assets/audiobooks
+
+networks:
+  toniebox:

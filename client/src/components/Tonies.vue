@@ -10,7 +10,7 @@
 <script>
 export default {
   props: {
-    tonies: String,
+    tonies: Array,
     audiobookID: String,
   },
   methods: {

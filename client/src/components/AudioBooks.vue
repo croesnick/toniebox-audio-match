@@ -105,11 +105,11 @@ export default {
         });
     },
     uploadAlbumToTonie(tonieID, audiobookID) {
-      const path = `${backendUrl}/upload`;
+      const path = `${backendUrl}/uploads`;
       axios.post(path, { tonie_id: tonieID, audiobook_id: audiobookID })
         .then((res) => {
           // eslint-disable-next-line
-          console.log('Upload id: ' + res.data.upload_id);
+          console.log('Upload ID: ' + res.data.id);
         })
         .catch((error) => {
           // eslint-disable-next-line

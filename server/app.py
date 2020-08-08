@@ -6,6 +6,14 @@ from pathlib import Path
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from redis import Redis
+from rq import Queue
+from rq.job import Job
+
+from worker.upload import upload_facade
+
+redis = Redis(host="redis", port=6379, db=0)
+queue = Queue(connection=redis)
 
 import localstorage.client
 
@@ -60,12 +68,12 @@ def ping_pong():
 
 @app.route("/audiobooks", methods=["GET"])
 def all_audiobooks():
-    return jsonify({"status": "success", "audiobooks": audio_books,})
+    return jsonify({"status": "success", "audiobooks": audio_books, })
 
 
 @app.route("/creativetonies", methods=["GET"])
 def all_creativetonies():
-    return jsonify({"status": "success", "creativetonies": creative_tonies,})
+    return jsonify({"status": "success", "creativetonies": creative_tonies, })
 
 
 @dataclass
@@ -81,14 +89,24 @@ class Upload:
         )
 
 
-@app.route("/upload", methods=["POST"])
+@app.route("/uploads", methods=["POST"])
 def upload_album_to_tonie():
     body = request.json
     upload = Upload.from_ids(tonie=body["tonie_id"], audiobook=body["audiobook_id"])
     logger.debug(f"Created upload object: {upload}")
 
-    status = tonie_cloud_api.put_album_on_tonie(upload.audiobook, upload.tonie)
-    return jsonify({"status": "success" if status else "failure", "upload_id": str(upload)}), 201
+    job = queue.enqueue(upload_facade, upload.audiobook, upload.tonie)
+    return jsonify({"id": job.id}), 202
+
+
+@app.route("/uploads/<upload_id>", methods=["GET"])
+def upload_status(upload_id: str):
+    if not Job.exists(upload_id, connection=redis):
+        return jsonify({"id": upload_id}), 404
+
+    job = Job.fetch(upload_id, connection=redis)
+    # TODO Use job.result
+    return jsonify({"id": upload_id, "finished": job.is_finished}), 200
 
 
 if __name__ == "__main__":

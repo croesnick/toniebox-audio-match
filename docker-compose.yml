@@ -5,6 +5,7 @@ services:
     image: 'node:14.7-stretch'
     command: >
       bash -c "cd /frontend &&
+      npm install &&
       npm run serve"
     networks:
       - toniebox

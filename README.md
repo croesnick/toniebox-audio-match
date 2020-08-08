@@ -15,6 +15,8 @@ That's cumbersome.
 How about a simple UI which shows all your audio books where one click suffices to upload an audio book to a tonie?
 Congratulations, search no more, you are right here, I got your back! :)
 
+![Example](sample.png)
+
 ## Configuration & Start
 
 Place an `.env` file in this project's root with the following contents:

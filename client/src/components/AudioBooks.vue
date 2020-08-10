@@ -44,7 +44,7 @@
 import axios from 'axios';
 import Tonies from './Tonies.vue';
 
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+const backendUrl = `${process.env.TONIE_AUDIO_MATCH_BACKEND_SCHEME}://${process.env.TONIE_AUDIO_MATCH_BACKEND_HOST}:${process.env.TONIE_AUDIO_MATCH_BACKEND_PORT}`;
 
 function cmp(a, b) {
   if (!a && !b) {
@@ -83,7 +83,7 @@ export default {
         || cmp(lhs.title, rhs.title);
     },
     getAudiobooks() {
-      const path = 'http://localhost:8080/audiobooks';
+      const path = `${backendUrl}/audiobooks`;
       axios.get(path)
         .then((res) => {
           this.audiobooks = res.data.audiobooks.sort(this.cmpAudioBooks);
@@ -94,7 +94,7 @@ export default {
         });
     },
     getCreativeTonies() {
-      const path = 'http://localhost:8080/creativetonies';
+      const path = `${backendUrl}/creativetonies`;
       axios.get(path)
         .then((res) => {
           this.creativetonies = res.data.creativetonies;
@@ -105,7 +105,7 @@ export default {
         });
     },
     uploadAlbumToTonie(tonieID, audiobookID) {
-      const path = 'http://localhost:8080/upload';
+      const path = `${backendUrl}/upload`;
       axios.post(path, { tonie_id: tonieID, audiobook_id: audiobookID })
         .then((res) => {
           // eslint-disable-next-line

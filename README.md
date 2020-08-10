@@ -22,9 +22,16 @@ Congratulations, search no more, you are right here, I got your back! :)
 Place an `.env` file in this project's root with the following contents:
 
 ```text
-TONIE_AUDIO_MATCH_MEDIA_PATH="path/to/your/local/media/library"
-TONIE_AUDIO_MATCH_USER="yourtonie@email.com"
-TONIE_AUDIO_MATCH_PASS="your-password-on-tonies.de"
+TONIE_AUDIO_MATCH_MEDIA_PATH=path/to/your/local/media/library
+
+TONIE_AUDIO_MATCH_FRONTEND_PORT=80
+
+TONIE_AUDIO_MATCH_BACKEND_SCHEME=http
+TONIE_AUDIO_MATCH_BACKEND_HOST=localhost
+TONIE_AUDIO_MATCH_BACKEND_PORT=8080
+
+TONIE_AUDIO_MATCH_USER=your@email.com
+TONIE_AUDIO_MATCH_PASS=your-password-on-tonies.de
 ```
 
 Start the whole application with `docker-compose up` and, after some initial processing of your media library, access your album covers locally at [http://localhost](http://localhost).

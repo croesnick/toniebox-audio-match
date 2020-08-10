@@ -4,9 +4,9 @@ services:
   frontend:
     image: node:14.7-stretch
     environment:
-      - TONIE_AUDIO_MATCH_BACKEND_SCHEME
-      - TONIE_AUDIO_MATCH_BACKEND_HOST
-      - TONIE_AUDIO_MATCH_BACKEND_PORT
+      - VUE_APP_BACKEND_SCHEME=${TONIE_AUDIO_MATCH_BACKEND_SCHEME}
+      - VUE_APP_BACKEND_HOST=${TONIE_AUDIO_MATCH_BACKEND_HOST}
+      - VUE_APP_BACKEND_PORT=${TONIE_AUDIO_MATCH_BACKEND_PORT}
     command: >
       bash -c "cd /frontend &&
       npm install &&

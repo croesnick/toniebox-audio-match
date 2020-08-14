@@ -42,9 +42,9 @@ audio_books_models = list(audiobooks())
 audio_books = [
     {
         "id": album.id,
-        "title": album.album,
         "artist": album.artist,
-        "episode": album.album_no,
+        "title": album.album,
+        "disc": album.album_no,
         "cover_uri": str(album.cover_relative) if album.cover else None,
     }
     for album in audio_books_models

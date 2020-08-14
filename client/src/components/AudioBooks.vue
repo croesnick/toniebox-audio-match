@@ -20,7 +20,10 @@
                 </svg>
               </div>
               <div class="card-body">
-                <h5 class="card-title">{{ audiobook.title }}</h5>
+                <h5 class="card-title">
+                  {{ audiobook.title }}
+                  <div v-if="audiobook.disc !== null"> ({{ audiobook.disc }})</div>
+                </h5>
                 <h6 class="card-subtitle mb-2 text-muted">{{ audiobook.artist }}</h6>
               </div>
               <Tonies :tonies="creativetonies"
@@ -52,11 +55,36 @@ export default {
     };
   },
   methods: {
+    cmpProp(a, b) {
+      if (!a || !b) {
+        return 0;
+      }
+      if (!a) {
+        return 1;
+      }
+      if (!b) {
+        return -1;
+      }
+
+      if (typeof a === 'string') {
+        return a.localeCompare(b);
+      }
+
+      if (a < b) {
+        return -1;
+      }
+      return a > b ? 1 : 0;
+    },
+    cmpAudioBooks(lhs, rhs) {
+      return this.cmpProp(lhs.artist, rhs.artist)
+        || this.cmpProp(lhs.disc, rhs.disc)
+        || this.cmpProp(lhs.title, rhs.title);
+    },
     getAudiobooks() {
       const path = 'http://localhost:8080/audiobooks';
       axios.get(path)
         .then((res) => {
-          this.audiobooks = res.data.audiobooks;
+          this.audiobooks = res.data.audiobooks.sort(this.cmpAudioBooks);
         })
         .catch((error) => {
           // eslint-disable-next-line

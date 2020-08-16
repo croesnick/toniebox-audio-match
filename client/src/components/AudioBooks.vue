@@ -46,6 +46,27 @@ import Tonies from './Tonies.vue';
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 
+function cmp(a, b) {
+  if (!a && !b) {
+    return 0;
+  }
+  if (!a) {
+    return 1;
+  }
+  if (!b) {
+    return -1;
+  }
+
+  if (typeof a === 'string') {
+    return a.localeCompare(b);
+  }
+
+  if (a < b) {
+    return -1;
+  }
+  return a > b ? 1 : 0;
+}
+
 export default {
   components: { Tonies },
   data() {
@@ -54,31 +75,12 @@ export default {
       creativetonies: [],
     };
   },
+  cmp,
   methods: {
-    cmpProp(a, b) {
-      if (!a || !b) {
-        return 0;
-      }
-      if (!a) {
-        return 1;
-      }
-      if (!b) {
-        return -1;
-      }
-
-      if (typeof a === 'string') {
-        return a.localeCompare(b);
-      }
-
-      if (a < b) {
-        return -1;
-      }
-      return a > b ? 1 : 0;
-    },
     cmpAudioBooks(lhs, rhs) {
-      return this.cmpProp(lhs.artist, rhs.artist)
-        || this.cmpProp(lhs.disc, rhs.disc)
-        || this.cmpProp(lhs.title, rhs.title);
+      return cmp(lhs.artist, rhs.artist)
+        || cmp(lhs.disc, rhs.disc)
+        || cmp(lhs.title, rhs.title);
     },
     getAudiobooks() {
       const path = 'http://localhost:8080/audiobooks';

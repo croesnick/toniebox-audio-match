@@ -18,3 +18,26 @@ describe('value comparison', () => {
     expect(cmp).toEqual(expected);
   });
 });
+
+describe('audibook comparison', () => {
+  each([
+    [
+      { artist: 'Bob der Baumeister', disc: 1, title: 'Bob hilft dem Weihnachtsmann' },
+      { artist: 'Bob der Baumeister', disc: 1, title: 'Spass im Schnee' },
+      -1,
+    ],
+    [
+      { artist: 'Bob der Baumeister', disc: 3, title: 'Bob hilft dem Weihnachtsmann' },
+      { artist: 'Leo Lausemaus', disc: 1, title: 'Will nicht baden' },
+      -1,
+    ],
+    [
+      { artist: 'Bob der Baumeister', disc: null, title: 'Bob hilft dem Weihnachtsmann' },
+      { artist: 'Bob der Baumeister', disc: 1, title: 'Bob hilft dem Weihnachtsmann' },
+      1,
+    ],
+  ]).it("when the input is '%s' and '%s'", (lhs, rhs, expected) => {
+    const cmp = AudioBooks.methods.cmpAudioBooks(lhs, rhs);
+    expect(cmp).toEqual(expected);
+  });
+});

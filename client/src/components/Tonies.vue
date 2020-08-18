@@ -1,6 +1,6 @@
 <template>
   <select class="form-control" @change="tonieSelected">
-    <option disabled value="">Wähle deinen Tonie</option>
+    <option selected disabled>Wähle deinen Tonie</option>
     <option v-for="tonie in tonies" :key="tonie.id" :value="tonie.id">
       {{ tonie.name }}
     </option>

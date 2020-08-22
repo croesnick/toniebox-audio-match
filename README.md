@@ -17,6 +17,10 @@ Congratulations, search no more, you are right here, I got your back! :)
 
 ![Example](sample.png)
 
+So yet another UI to access from your laptop? 
+Not at all! 
+Put it onto a RaspberryPi and voilà -- accessible from your mobile whenever you need it! 🙂
+
 ## Configuration & Start
 
 Place an `.env` file in this project's root to configure your service (like credentials for [tonies.de](https://tonies.de)).

@@ -17,14 +17,13 @@ Congratulations, search no more, you are right here, I got your back! :)
 
 ![Example](sample.png)
 
+So yet another UI to access from your laptop? 
+Not at all! 
+Put it onto a RaspberryPi and voilà -- accessible from your mobile whenever you need it! 🙂
+
 ## Configuration & Start
 
-Place an `.env` file in this project's root with the following contents:
+Place an `.env` file in this project's root to configure your service (like credentials for [tonies.de](https://tonies.de)).
+Please see [.env.sample](.env.sample) for a sample configuration.
 
-```text
-TONIE_AUDIO_MATCH_MEDIA_PATH="path/to/your/local/media/library"
-TONIE_AUDIO_MATCH_USER="yourtonie@email.com"
-TONIE_AUDIO_MATCH_PASS="your-password-on-tonies.de"
-```
-
-Start the whole application with `docker-compose up` and, after some initial processing of your media library, access your album covers locally at [http://localhost](http://localhost).
+Once configured, start the whole application with `docker-compose up` and, after some initial processing of your media library, access your album covers locally at [http://localhost](http://localhost).

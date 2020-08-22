@@ -24,6 +24,6 @@ Put it onto a RaspberryPi and voilà -- accessible from your mobile whenever you
 ## Configuration & Start
 
 Place an `.env` file in this project's root to configure your service (like credentials for [tonies.de](https://tonies.de)).
-Please see [.env,sample](.env.sample]) for a sample configuration.
+Please see [.env.sample](.env.sample]) for a sample configuration.
 
 Once configured, start the whole application with `docker-compose up` and, after some initial processing of your media library, access your album covers locally at [http://localhost](http://localhost).

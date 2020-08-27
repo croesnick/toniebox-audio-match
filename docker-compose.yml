@@ -25,6 +25,7 @@ services:
       - TONIE_AUDIO_MATCH_MEDIA_PATH
       - TONIE_AUDIO_MATCH_USER
       - TONIE_AUDIO_MATCH_PASS
+      - TONIE_AUDIO_MATCH_REDIS_URI
     command: >
       bash -c "cd /backend &&
       pip install -r requirements.txt &&
@@ -45,10 +46,11 @@ services:
     environment:
       - TONIE_AUDIO_MATCH_USER
       - TONIE_AUDIO_MATCH_PASS
+      - TONIE_AUDIO_MATCH_REDIS_URI
     command: >
       bash -c "cd /backend &&
       pip install -r requirements.txt &&
-      rq worker --url redis://redis:6379/0 --with-scheduler"
+      rq worker --url ${TONIE_AUDIO_MATCH_REDIS_URI} --with-scheduler --logging_level DEBUG"
     networks:
       - toniebox
     volumes:

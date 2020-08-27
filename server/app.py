@@ -3,24 +3,23 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from redis import Redis
 from rq import Queue
-from rq.job import Job
-
-from worker.upload import upload_facade
-
-redis = Redis(host="redis", port=6379, db=0)
-queue = Queue(connection=redis)
+from rq.exceptions import NoSuchJobError
+from rq.job import Job, JobStatus
 
 import localstorage.client
-
-# configuration
 from models.audio import AudioBook
 from models.tonie import Tonie
 from toniecloud.client import TonieCloud
+from worker.upload import upload_facade
+
+redis = Redis.from_url(os.getenv("TONIE_AUDIO_MATCH_REDIS_URI"))
+queue = Queue(connection=redis)
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
 logger = logging.getLogger(__name__)
@@ -101,12 +100,30 @@ def upload_album_to_tonie():
 
 @app.route("/uploads/<upload_id>", methods=["GET"])
 def upload_status(upload_id: str):
-    if not Job.exists(upload_id, connection=redis):
-        return jsonify({"id": upload_id}), 404
+    def response(status_: Optional[str] = None) -> str:
+        return jsonify({"id": upload_id, "status": status_})
 
-    job = Job.fetch(upload_id, connection=redis)
-    # TODO Use job.result
-    return jsonify({"id": upload_id, "finished": job.is_finished}), 200
+    try:
+        job = Job.fetch(upload_id, connection=redis)
+        status = job.get_status()
+    except NoSuchJobError:
+        return response(), 404
+    else:
+        pending = status is None or status in (JobStatus.QUEUED, JobStatus.STARTED, JobStatus.DEFERRED)
+        if pending:
+            return response("pending"), 200
+
+        result: Optional[bool] = job.result
+        failed = not status or status == JobStatus.FAILED or not result
+
+        if failed:
+            return response("failed"), 200
+
+        success = status == JobStatus.FINISHED and result is True
+        if success:
+            return response("success"), 200
+
+        return response("unknown"), 200
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ import requests
 
 class TonieCloudSession(requests.Session):
     URI: ClassVar[str] = "https://api.tonie.cloud/v2"
+    OPENID_CONNECT: ClassVar[str] = "https://login.tonies.com/auth/realms/tonies/protocol/openid-connect/token"
 
     def __init__(self):
         super().__init__()
@@ -15,6 +16,12 @@ class TonieCloudSession(requests.Session):
         self.token = self._acquire_token(username, password)
 
     def _acquire_token(self, username: str, password: str) -> str:
-        req = requests.post(f"{self.URI}/sessions", json={"email": username, "password": password,})
-
-        return req.json()["jwt"]
+        data = {
+            "grant_type": 'password',
+            "client_id": "my-tonies",
+            "scope": "openid",
+            "username": username,
+            "password": password,
+        }
+        response = requests.post(self.OPENID_CONNECT, data=data)
+        return response.json()["access_token"]

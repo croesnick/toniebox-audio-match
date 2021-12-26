@@ -54,7 +54,7 @@ class TonieCloud:
         data = {
             "chapters": [
                 {"title": track.title, "file": self._upload_track(track)}
-                for track in sorted(audiobook.tracks, key=lambda t: t.track)
+                for track in sorted(audiobook.tracks, key=lambda t: int(t.track) if t.track.isdigit() else t.track )
             ]
         }
 

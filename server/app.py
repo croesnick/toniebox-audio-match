@@ -26,7 +26,10 @@ app.config.from_object(__name__)
 # enable CORS
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-tonie_cloud_api = TonieCloud(os.environ.get("TONIE_AUDIO_MATCH_USER"), os.environ.get("TONIE_AUDIO_MATCH_PASS"))
+tonie_cloud_api = TonieCloud(
+    os.environ.get("TONIE_AUDIO_MATCH_USER"),
+    os.environ.get("TONIE_AUDIO_MATCH_PASS")
+)
 
 
 def audiobooks():
@@ -38,6 +41,12 @@ def audiobooks():
             yield audiobook
 
 
+def songs():
+    songs = localstorage.client.audiofiles(Path("assets/audiobooks"))
+    return songs
+
+
+songs = list(songs())
 audio_books_models = list(audiobooks())
 audio_books = [
     {
@@ -60,12 +69,22 @@ def ping_pong():
 
 @app.route("/audiobooks", methods=["GET"])
 def all_audiobooks():
-    return jsonify({"status": "success", "audiobooks": audio_books,})
+    return jsonify(
+        {
+            "status": "success",
+            "audiobooks": audio_books,
+        }
+    )
 
 
 @app.route("/creativetonies", methods=["GET"])
 def all_creativetonies():
-    return jsonify({"status": "success", "creativetonies": creative_tonies,})
+    return jsonify(
+        {
+            "status": "success",
+            "creativetonies": creative_tonies,
+        }
+    )
 
 
 @dataclass
@@ -77,7 +96,8 @@ class Upload:
     def from_ids(cls, tonie: str, audiobook: str) -> "Upload":
         return cls(
             next(filter(lambda t: t.id == tonie, creative_tonies), None),
-            next(filter(lambda a: a.id == audiobook, audio_books_models), None),
+            next(filter(lambda a: a.id == audiobook, audio_books_models),
+            None),
         )
 
 
@@ -88,7 +108,12 @@ def upload_album_to_tonie():
     logger.debug(f"Created upload object: {upload}")
 
     status = tonie_cloud_api.put_album_on_tonie(upload.audiobook, upload.tonie)
-    return jsonify({"status": "success" if status else "failure", "upload_id": str(upload)}), 201
+    return (
+        jsonify(
+            {"status": "success" if status else "failure", "upload_id": str(upload)}
+        ),
+        201,
+    )
 
 
 if __name__ == "__main__":

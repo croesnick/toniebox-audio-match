@@ -30,7 +30,8 @@ services:
       pip install -r requirements.txt &&
       apt-get update &&
       apt-get install -y procps gdb &&
-      python app.py"
+      python app.py &&
+      bash /backend/start_debugger.sh"
     networks:
       - toniebox
     ports:

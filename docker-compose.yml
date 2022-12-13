@@ -28,11 +28,19 @@ services:
     command: >
       bash -c "cd /backend &&
       pip install -r requirements.txt &&
-      python app.py"
+      apt-get update &&
+      apt-get install -y procps gdb &&
+      python app.py &&
+      bash /backend/start_debugger.sh"
     networks:
       - toniebox
     ports:
       - ${TONIE_AUDIO_MATCH_BACKEND_PORT}:5000
+      - 5678:5678
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
     volumes:
       - ./server/:/backend
       - ./albumart/:/backend/assets/covers

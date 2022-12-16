@@ -83,6 +83,9 @@ typings/
 .env
 .env.test
 
+# direnv .envrc file
+.envrc
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 

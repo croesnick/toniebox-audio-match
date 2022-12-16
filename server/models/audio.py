@@ -20,6 +20,20 @@ class AudioTrack:
     track: int
     file: Path
 
+    @classmethod
+    def from_path(cls, path: Path) -> Optional["AudioTrack"]:
+        try:
+            tag = TinyTag.get(path)
+            return cls(
+                album=tag.album,
+                title=tag.title,
+                track=tag.track,
+                file=path,
+            )
+        except Exception as e:
+            logger.error("Failed to parse audio file %s: %s", path, e)
+            return None
+
 
 @dataclass(frozen=True)
 class AudioBook:

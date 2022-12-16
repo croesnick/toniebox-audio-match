@@ -11,6 +11,7 @@ import localstorage.client
 
 # configuration
 from models.audio import AudioBook
+from models.audio import AudioTrack
 from models.tonie import Tonie
 from toniecloud.client import TonieCloud
 
@@ -43,10 +44,18 @@ def audiobooks():
 
 def songs():
     songs = localstorage.client.audiofiles(Path("assets/audiobooks"))
+    songs = [AudioTrack.from_path(song) for song in songs]
     return songs
 
 
-songs = list(songs())
+songs_models = list(songs())
+songs = [
+    {
+        "file": str(song.file.stem),
+    }
+    for song in songs_models
+] 
+
 audio_books_models = list(audiobooks())
 audio_books = [
     {
@@ -76,6 +85,14 @@ def all_audiobooks():
         }
     )
 
+@app.route("/songs", methods=["GET"])
+def all_songs():
+    return jsonify(
+        {
+            "status": "success", 
+            "songs": songs,
+        }
+    )
 
 @app.route("/creativetonies", methods=["GET"])
 def all_creativetonies():

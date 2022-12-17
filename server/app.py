@@ -103,6 +103,18 @@ def all_creativetonies():
         }
     )
 
+@app.route("/tonie_overview", methods=["POST"])
+def tonie_overview():
+    # body = request.json
+    tonie_id = "EDE61A15500304E0"
+    tonie = [tonie for tonie in creative_tonies if tonie.id == tonie_id][0]
+    tonie_content = tonie_cloud_api.get_tonie_content(tonie)
+    return jsonify(
+        {
+            "status": "success",
+            "tracks": tonie_content,
+        }
+    )
 
 @dataclass
 class Upload:

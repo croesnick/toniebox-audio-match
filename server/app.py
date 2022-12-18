@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 import localstorage.client
 
@@ -26,8 +27,7 @@ app.config.from_object(__name__)
 # enable CORS
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-tonie_cloud_api = TonieCloud(
-)
+tonie_cloud_api = TonieCloud(os.environ.get("TONIE_AUDIO_MATCH_USER"), os.environ.get("TONIE_AUDIO_MATCH_PASS"))
 
 
 def audiobooks():

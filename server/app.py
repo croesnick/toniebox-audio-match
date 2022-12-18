@@ -11,6 +11,7 @@ import localstorage.client
 
 # configuration
 from models.audio import AudioBook
+from models.audio import AudioTrack
 from models.tonie import Tonie
 from toniecloud.client import TonieCloud
 
@@ -38,6 +39,20 @@ def audiobooks():
             yield audiobook
 
 
+def songs():
+    songs = localstorage.client.audiofiles(Path("assets/audiobooks"))
+    songs = [AudioTrack.from_path(song) for song in songs]
+    return songs
+
+
+songs_models = list(songs())
+songs = [
+    {
+        "file": str(song.file.stem),
+    }
+    for song in songs_models
+]
+
 audio_books_models = list(audiobooks())
 audio_books = [
     {
@@ -60,12 +75,70 @@ def ping_pong():
 
 @app.route("/audiobooks", methods=["GET"])
 def all_audiobooks():
-    return jsonify({"status": "success", "audiobooks": audio_books,})
+    return jsonify(
+        {
+            "status": "success",
+            "audiobooks": audio_books,
+        }
+    )
+
+
+@app.route("/songs", methods=["GET"])
+def all_songs():
+    return jsonify(
+        {
+            "songs": songs,
+        }
+    )
 
 
 @app.route("/creativetonies", methods=["GET"])
 def all_creativetonies():
-    return jsonify({"status": "success", "creativetonies": creative_tonies,})
+    return jsonify(
+        {
+            "status": "success",
+            "creativetonies": creative_tonies,
+        }
+    )
+
+
+@app.route("/tonie_overview", methods=["GET"])
+def tonie_overview():
+    # body = request.json
+    tonie_id = "EDE61A15500304E0"
+    tonie = [tonie for tonie in creative_tonies if tonie.id == tonie_id][0]
+    tonie_content = tonie_cloud_api.get_tonie_content(tonie)
+    return jsonify(
+        {
+            "status": "success",
+            "tracks": tonie_content,
+        }
+    )
+
+
+@app.route("/delete_track", methods=["POST"])
+def delete_track():
+    body = request.json
+    tonie_id = body["tonie_id"]
+    track_id = body["track_id"]
+    tonie = [tonie for tonie in creative_tonies if tonie.id == tonie_id][0]
+
+    current_content = tonie_cloud_api.get_tonie_content(tonie)
+    new_content = [
+        track for track in current_content["chapters"] if track["id"] not in track_id
+    ]
+
+    tonie_cloud_api.update_tonie_content(tonie, new_content)
+
+    return jsonify(
+        {
+            "status": "success",
+            "tonie": tonie,
+            "tonie_id": tonie_id,
+            "track_id": track_id,
+            "new_content": new_content,
+        }
+    )
 
 
 @dataclass
@@ -88,7 +161,12 @@ def upload_album_to_tonie():
     logger.debug(f"Created upload object: {upload}")
 
     status = tonie_cloud_api.put_album_on_tonie(upload.audiobook, upload.tonie)
-    return jsonify({"status": "success" if status else "failure", "upload_id": str(upload)}), 201
+    return (
+        jsonify(
+            {"status": "success" if status else "failure", "upload_id": str(upload)}
+        ),
+        201,
+    )
 
 
 if __name__ == "__main__":

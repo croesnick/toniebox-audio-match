@@ -46,10 +46,33 @@ class TonieCloud:
             url = f"households/{household.id}/creativetonies"
             data = self._get(url)
             for tonie in data:
-                tonies.append(Tonie(id=tonie["id"], household=household, name=tonie["name"], image=tonie["imageUrl"]))
+                tonies.append(
+                    Tonie(
+                        id=tonie["id"],
+                        household=household,
+                        name=tonie["name"],
+                        image=tonie["imageUrl"],
+                    )
+                )
 
         return tonies
 
+    def get_tonie_content(self, tonie: Tonie) -> List[AudioTrack]:
+        url = f"households/{tonie.household.id}/creativetonies/{tonie.id}"
+        data = self._get(url)
+        return data
+        # tracks = [
+        #     AudioTrack(
+        #         id = chapter["id"],
+        #         title=chapter["title"],
+        #         file=chapter["file"],
+        #         seconds=chapter["seconds"],
+        #         duration=chapter["duration"],
+        #     )
+        #     for chapter in data["chapters"]
+        # ]
+        # stats = data[]
+        
     def put_album_on_tonie(self, audiobook: AudioBook, tonie: Tonie) -> bool:
         data = {
             "chapters": [
@@ -58,9 +81,16 @@ class TonieCloud:
             ]
         }
 
-        logger.debug("Sending chapter data from audio book %r to tonie %r: %r", audiobook.album, tonie.name, data)
+        logger.debug(
+            "Sending chapter data from audio book %r to tonie %r: %r",
+            audiobook.album,
+            tonie.name,
+            data,
+        )
         response = self.session.patch(
-            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}", headers=self.auth_header, json=data
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
         )
 
         if not response.ok:
@@ -69,11 +99,46 @@ class TonieCloud:
 
         body = response.json()
 
-        logger.info("Yay! Uploaded album %r to tonie %r! Response: %s", audiobook.album, tonie.name, response)
+        logger.info(
+            "Yay! Uploaded album %r to tonie %r! Response: %s",
+            audiobook.album,
+            tonie.name,
+            response,
+        )
 
         logger.debug("Transcoding errors: %r", body["transcodingErrors"])
         logger.debug("Chapters on tonie %r: %r", tonie.name, body["chapters"])
-        logger.debug("Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"])
+        logger.debug(
+            "Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"]
+        )
+
+        return True
+
+    def update_tonie_content(self, tonie: Tonie, tracks) -> bool:
+        data = {
+                "chapters": [
+                    {"title": track["title"], "file": track["file"]} for track in tracks 
+                ]
+        }
+        
+        logger.debug(
+            f"Sending songs to tony {data}")
+        response = self.session.patch(
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
+        )
+
+        if not response.ok:
+            logger.error("Something went wrong :'( -> %s", response)
+            return False
+
+        logger.info(
+            "Yay! Deleted track %r from tonie %r! Response: %s",
+            tracks,
+            tonie.name,
+            response,
+        )
 
         return True
 
@@ -89,7 +154,13 @@ class TonieCloud:
         audio_mime_type = mimetypes.guess_type(file)
         logger.debug("Guessed MIME type %r for file %r", audio_mime_type, str(file))
         if audio_mime_type in MIME_TO_CONTENT_TYPE:
-            files = {"file": (data["request"]["fields"]["key"], file.open("rb"), MIME_TO_CONTENT_TYPE[audio_mime_type])}
+            files = {
+                "file": (
+                    data["request"]["fields"]["key"],
+                    file.open("rb"),
+                    MIME_TO_CONTENT_TYPE[audio_mime_type],
+                )
+            }
         else:
             files = {"file": (data["request"]["fields"]["key"], file.open("rb"))}
 
@@ -97,13 +168,17 @@ class TonieCloud:
         if not response.ok:
             raise ValueError("Well, something went wrong. :'(")
 
-        logger.debug("File location: %r, id: %r", response.headers["Location"], data["fileId"])
+        logger.debug(
+            "File location: %r, id: %r", response.headers["Location"], data["fileId"]
+        )
         return data["fileId"]
 
     def _get(self, path: str) -> dict:
         headers = {"Authorization": f"Bearer {self.session.token}"}
 
-        resp = self.session.request("GET", f"{self.url}/{path}", headers=headers, data={})
+        resp = self.session.request(
+            "GET", f"{self.url}/{path}", headers=headers, data={}
+        )
 
         if not resp.ok:
             # TODO Properly handle errors, especially outdated tokens

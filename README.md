@@ -2,7 +2,8 @@
 
 This is a fork of @croesnick toniebox-audio-match. My aim is to enhance it by the ability to upload single audio files instead of while audio books. Might later on merge with original project if desired.
 
-Your 1-click audio book upload to your [creative tonies](https://tonies.com).
+Your easy management solution for your [creative tonies](https://tonies.com).
+
 
 ## The Story
 

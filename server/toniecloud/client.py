@@ -114,6 +114,34 @@ class TonieCloud:
 
         return True
 
+    def update_tonie_content(self, tonie: Tonie, tracks) -> bool:
+        data = {
+                "chapters": [
+                    {"title": track["title"], "file": track["file"]} for track in tracks 
+                ]
+        }
+        
+        logger.debug(
+            f"Sending songs to tony {data}")
+        response = self.session.patch(
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
+        )
+
+        if not response.ok:
+            logger.error("Something went wrong :'( -> %s", response)
+            return False
+
+        logger.info(
+            "Yay! Deleted track %r from tonie %r! Response: %s",
+            tracks,
+            tonie.name,
+            response,
+        )
+
+        return True
+
     def _upload_track(self, track: AudioTrack) -> str:
         return self._upload_file(track.file)
 

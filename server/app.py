@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from flask import Flask, jsonify, request
-from flask_cors import CORS
 
 import localstorage.client
 
@@ -28,8 +27,6 @@ app.config.from_object(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 tonie_cloud_api = TonieCloud(
-    os.environ.get("TONIE_AUDIO_MATCH_USER"),
-    os.environ.get("TONIE_AUDIO_MATCH_PASS")
 )
 
 
@@ -54,7 +51,7 @@ songs = [
         "file": str(song.file.stem),
     }
     for song in songs_models
-] 
+]
 
 audio_books_models = list(audiobooks())
 audio_books = [
@@ -85,14 +82,15 @@ def all_audiobooks():
         }
     )
 
+
 @app.route("/songs", methods=["GET"])
 def all_songs():
     return jsonify(
         {
-            "status": "success", 
             "songs": songs,
         }
     )
+
 
 @app.route("/creativetonies", methods=["GET"])
 def all_creativetonies():
@@ -103,7 +101,8 @@ def all_creativetonies():
         }
     )
 
-@app.route("/tonie_overview", methods=["POST"])
+
+@app.route("/tonie_overview", methods=["GET"])
 def tonie_overview():
     # body = request.json
     tonie_id = "EDE61A15500304E0"
@@ -116,6 +115,32 @@ def tonie_overview():
         }
     )
 
+
+@app.route("/delete_track", methods=["POST"])
+def delete_track():
+    body = request.json
+    tonie_id = body["tonie_id"]
+    track_id = body["track_id"]
+    tonie = [tonie for tonie in creative_tonies if tonie.id == tonie_id][0]
+
+    current_content = tonie_cloud_api.get_tonie_content(tonie)
+    new_content = [
+        track for track in current_content["chapters"] if track["id"] not in track_id
+    ]
+
+    tonie_cloud_api.update_tonie_content(tonie, new_content)
+
+    return jsonify(
+        {
+            "status": "success",
+            "tonie": tonie,
+            "tonie_id": tonie_id,
+            "track_id": track_id,
+            "new_content": new_content,
+        }
+    )
+
+
 @dataclass
 class Upload:
     tonie: Tonie
@@ -125,8 +150,7 @@ class Upload:
     def from_ids(cls, tonie: str, audiobook: str) -> "Upload":
         return cls(
             next(filter(lambda t: t.id == tonie, creative_tonies), None),
-            next(filter(lambda a: a.id == audiobook, audio_books_models),
-            None),
+            next(filter(lambda a: a.id == audiobook, audio_books_models), None),
         )
 
 

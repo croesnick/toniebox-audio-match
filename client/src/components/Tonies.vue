@@ -10,13 +10,12 @@
 <script>
 export default {
   props: {
-    tonies: String,
+    tonies: [Array],
     audiobookID: String,
   },
   methods: {
     tonieSelected(event) {
       // eslint-disable-next-line
-      alert('Starting upload. Your tonie will be ready in a few minutes! :)');
       this.$emit('onchange', event.target.value, this.audiobookID);
     },
   },

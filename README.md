@@ -1,24 +1,11 @@
 # tonie-audio-match
 
-This is a fork of @croesnick toniebox-audio-match. My aim is to enhance it by the ability to upload single audio files instead of while audio books. Might later on merge with original project if desired.
+This is a fork of @croesnick toniebox-audio-match. I moved the original functionality of @croesnick repo to /audiobooks when launching the app. Instead the root url launches a site where you can update the content of your creative tonies by quickly deleting and uploading files from your PC.
 
 Your easy management solution for your [creative tonies](https://tonies.com).
 
-
-## The Story
-
-It's bedtime for one of your kids, they are tired (just like you), their patience is down to a minimum.
-And now they want to hear their beloved audio book.
-Which of course is not on one of their creative tonies anymore.
-Darn.
-
-So... you are going to pick up your laptop, open the tonies website, log in... all the way down to uploading your child's desired audio book the proper tonie.
-That's cumbersome.
-
-How about a simple UI which shows all your audio books where one click suffices to upload an audio book to a tonie?
-Congratulations, search no more, you are right here, I got your back! :)
-
 ![Example](sample.png)
+
 
 So yet another UI to access from your laptop? 
 Not at all! 

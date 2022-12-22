@@ -5,6 +5,8 @@
         <div class="row">
           <div class="col">
               <form @submit="onSubmit" method="post" v-if="content">
+               <span v-if="chapters.length">Minutes Remaining on Tonie:
+               {{Math.floor(content.tracks.secondsRemaining/60)}}</span>
                 <div v-for="track in chapters" :key="track.id" class="col-md-11">
                   <label class="list-group-item gap-3">
                     <input class="form-check-input" type="checkbox"
@@ -31,6 +33,15 @@
               </form>
             </div>
           <div class="col">
+            <form @submit="downloadYoutube" method="post">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Youtube URL"
+                  aria-label="Youtube URL" aria-describedby="button-addon2"
+                  v-model="youtubeUrl">
+                <button class="btn btn-outline-secondary" type="submit"
+                  id="button-addon2">Download</button>
+              </div>
+            </form>
             <form @submit="onSubmitUpload" method="post" v-if="content">
               <div v-for="song in songs" :key="song.file" class="col-md-11">
                 <label class="list-group-item gap-3">
@@ -44,6 +55,8 @@
               </div>
                 <button type="submit" class="btn btn-success" >Upload Selected Files</button>
                 <button type="button" class="btn btn-primary" @click="Refresh">Refresh</button>
+                <button type="button" class="btn btn-danger" @click="deleteLocalTrack">
+                Delete Local Tracks</button>
             </form>
           </div>
       </div>
@@ -87,6 +100,7 @@ export default {
       deleteFromTonie: [],
       uploadToTonie: [],
       songs: [],
+      youtubeUrl: '',
       selectedTonie: String,
     };
   },
@@ -103,6 +117,7 @@ export default {
       axios.post(path, { tonie_id: creativeTonie })
         .then((res) => {
           this.chapters = res.data.tracks.chapters;
+          this.content = res.data;
           console.log(this.content);
         })
         .catch((error) => {
@@ -126,6 +141,21 @@ export default {
       axios.get(path)
         .then((res) => {
           this.songs = res.data.songs.sort(this.cmpSongs);
+          console.log(this.songs);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    deleteLocalTrack() {
+      console.log('deleteLocalTrack', this.uploadToTonie);
+      const path = `${backendUrl}/delete_local_track`;
+      axios.post(path, { file: this.uploadToTonie })
+        .then((res) => {
+          console.log(res);
+          this.getAudioOnDisk();
+          this.uploadToTonie = [];
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -157,6 +187,21 @@ export default {
           // eslint-disable-next-line
           console.log('res', res);
           this.getContent(this.selectedTonie);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    downloadYoutube(e) {
+      e.preventDefault();
+      const path = `${backendUrl}/download_youtube`;
+      console.log('DownloadYoutube', this.youtubeUrl);
+      axios.post(path, { youtube_url: this.youtubeUrl })
+        .then((res) => {
+          // eslint-disable-next-line
+          console.log('res', res);
+          this.getAudioOnDisk();
         })
         .catch((error) => {
           // eslint-disable-next-line

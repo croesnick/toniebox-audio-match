@@ -14,6 +14,7 @@ from models.audio import AudioBook
 from models.audio import AudioTrack
 from models.tonie import Tonie
 from toniecloud.client import TonieCloud
+from yt_dlp import YoutubeDL
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
 logger = logging.getLogger(__name__)
@@ -39,20 +40,22 @@ def audiobooks():
             yield audiobook
 
 
-def songs():
+def get_songs():
     songs = localstorage.client.audiofiles(Path("assets/audiobooks"))
     songs = [AudioTrack.from_path(song) for song in songs]
     return songs
 
-
-songs_models = list(songs())
-songs = [
-    {
-        "file": str(song.file.stem),
-        "file_original": str(song.file),
-    }
-    for song in songs_models
-]
+def songs_update():
+    songs_models = list(get_songs())
+    logger.debug(songs_models)
+    songs = [
+        {
+            "file": str(song.file.stem),
+            "file_original": str(song.file),
+        }
+        for song in songs_models
+    ]
+    return songs
 
 audio_books_models = list(audiobooks())
 audio_books = [
@@ -66,6 +69,7 @@ audio_books = [
     for album in audio_books_models
 ]
 
+songs = songs_update()
 creative_tonies = tonie_cloud_api.creativetonies()
 
 
@@ -86,9 +90,10 @@ def all_audiobooks():
 
 @app.route("/songs", methods=["GET"])
 def all_songs():
+    songs_local = songs_update()
     return jsonify(
         {
-            "songs": songs,
+            "songs": songs_local,
         }
     )
 
@@ -142,6 +147,43 @@ def delete_track():
         }
     )
 
+@app.route("/delete_local_track", methods=["POST"])
+def delete_local_track():
+    body = request.json
+    track_id = body["file"]
+    track = [track for track in songs_update() if track["file"] == track_id[0]][0]
+    os.remove(Path(track["file_original"]))
+
+    return jsonify(
+        {
+            "status": "success",
+            "track_id": track_id,
+        }
+    )
+
+@app.route("/download_youtube", methods=["POST"])
+def download_youtube():
+    body = request.json
+    youtube_url = body["youtube_url"]
+
+    ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }],
+            'outtmpl': '/backend/assets/audiobooks/%(title)s.%(ext)s',
+            'restrictfilenames': True,
+        }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
+    
+    return jsonify(
+        {
+            "status": "success",
+        }
+    )
 
 @dataclass
 class Upload:
@@ -186,7 +228,7 @@ def upload_track_to_tonie():
     track_id = body["track_ids"];
     tonie = [to for to in creative_tonies if to.id == tonie_id][0];
     for track in track_id:
-        song = [so for so in songs if so['file'] == track];
+        song = [so for so in songs_update() if so['file'] == track];
         upload = Upload.tracks_from_ids(tonie=tonie, song=song)
         status = tonie_cloud_api.put_songs_on_tonie(upload.track, upload.tonie)
     # logger.debug(f"Created upload object: {upload}")

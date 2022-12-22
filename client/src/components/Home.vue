@@ -5,6 +5,8 @@
         <div class="row">
           <div class="col">
               <form @submit="onSubmit" method="post" v-if="content">
+               <span v-if="chapters.length">Minutes Remaining on Tonie:
+               {{Math.floor(content.tracks.secondsRemaining/60)}}</span>
                 <div v-for="track in chapters" :key="track.id" class="col-md-11">
                   <label class="list-group-item gap-3">
                     <input class="form-check-input" type="checkbox"
@@ -53,6 +55,8 @@
               </div>
                 <button type="submit" class="btn btn-success" >Upload Selected Files</button>
                 <button type="button" class="btn btn-primary" @click="Refresh">Refresh</button>
+                <button type="button" class="btn btn-danger" @click="deleteLocalTrack">
+                Delete Local Tracks</button>
             </form>
           </div>
       </div>
@@ -113,6 +117,7 @@ export default {
       axios.post(path, { tonie_id: creativeTonie })
         .then((res) => {
           this.chapters = res.data.tracks.chapters;
+          this.content = res.data;
           console.log(this.content);
         })
         .catch((error) => {
@@ -137,6 +142,20 @@ export default {
         .then((res) => {
           this.songs = res.data.songs.sort(this.cmpSongs);
           console.log(this.songs);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    deleteLocalTrack() {
+      console.log('deleteLocalTrack', this.uploadToTonie);
+      const path = `${backendUrl}/delete_local_track`;
+      axios.post(path, { file: this.uploadToTonie })
+        .then((res) => {
+          console.log(res);
+          this.getAudioOnDisk();
+          this.uploadToTonie = [];
         })
         .catch((error) => {
           // eslint-disable-next-line

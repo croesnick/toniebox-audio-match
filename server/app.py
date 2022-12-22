@@ -147,6 +147,20 @@ def delete_track():
         }
     )
 
+@app.route("/delete_local_track", methods=["POST"])
+def delete_local_track():
+    body = request.json
+    track_id = body["file"]
+    track = [track for track in songs_update() if track["file"] == track_id[0]][0]
+    os.remove(Path(track["file_original"]))
+
+    return jsonify(
+        {
+            "status": "success",
+            "track_id": track_id,
+        }
+    )
+
 @app.route("/download_youtube", methods=["POST"])
 def download_youtube():
     body = request.json
@@ -159,6 +173,7 @@ def download_youtube():
                 'preferredcodec': 'mp3',
             }],
             'outtmpl': '/backend/assets/audiobooks/%(title)s.%(ext)s',
+            'restrictfilenames': True,
         }
 
     with YoutubeDL(ydl_opts) as ydl:
@@ -213,7 +228,7 @@ def upload_track_to_tonie():
     track_id = body["track_ids"];
     tonie = [to for to in creative_tonies if to.id == tonie_id][0];
     for track in track_id:
-        song = [so for so in songs if so['file'] == track];
+        song = [so for so in songs_update() if so['file'] == track];
         upload = Upload.tracks_from_ids(tonie=tonie, song=song)
         status = tonie_cloud_api.put_songs_on_tonie(upload.track, upload.tonie)
     # logger.debug(f"Created upload object: {upload}")

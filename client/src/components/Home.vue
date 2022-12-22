@@ -31,6 +31,15 @@
               </form>
             </div>
           <div class="col">
+            <form @submit="downloadYoutube" method="post">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Youtube URL"
+                  aria-label="Youtube URL" aria-describedby="button-addon2"
+                  v-model="youtubeUrl">
+                <button class="btn btn-outline-secondary" type="submit"
+                  id="button-addon2">Download</button>
+              </div>
+            </form>
             <form @submit="onSubmitUpload" method="post" v-if="content">
               <div v-for="song in songs" :key="song.file" class="col-md-11">
                 <label class="list-group-item gap-3">
@@ -87,6 +96,7 @@ export default {
       deleteFromTonie: [],
       uploadToTonie: [],
       songs: [],
+      youtubeUrl: '',
       selectedTonie: String,
     };
   },
@@ -126,6 +136,7 @@ export default {
       axios.get(path)
         .then((res) => {
           this.songs = res.data.songs.sort(this.cmpSongs);
+          console.log(this.songs);
         })
         .catch((error) => {
           // eslint-disable-next-line
@@ -157,6 +168,21 @@ export default {
           // eslint-disable-next-line
           console.log('res', res);
           this.getContent(this.selectedTonie);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line
+          console.error(error);
+        });
+    },
+    downloadYoutube(e) {
+      e.preventDefault();
+      const path = `${backendUrl}/download_youtube`;
+      console.log('DownloadYoutube', this.youtubeUrl);
+      axios.post(path, { youtube_url: this.youtubeUrl })
+        .then((res) => {
+          // eslint-disable-next-line
+          console.log('res', res);
+          this.getAudioOnDisk();
         })
         .catch((error) => {
           // eslint-disable-next-line

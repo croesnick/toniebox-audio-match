@@ -14,6 +14,7 @@ from models.audio import AudioBook
 from models.audio import AudioTrack
 from models.tonie import Tonie
 from toniecloud.client import TonieCloud
+from yt_dlp import YoutubeDL
 
 logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
 logger = logging.getLogger(__name__)
@@ -39,20 +40,22 @@ def audiobooks():
             yield audiobook
 
 
-def songs():
+def get_songs():
     songs = localstorage.client.audiofiles(Path("assets/audiobooks"))
     songs = [AudioTrack.from_path(song) for song in songs]
     return songs
 
-
-songs_models = list(songs())
-songs = [
-    {
-        "file": str(song.file.stem),
-        "file_original": str(song.file),
-    }
-    for song in songs_models
-]
+def songs_update():
+    songs_models = list(get_songs())
+    logger.debug(songs_models)
+    songs = [
+        {
+            "file": str(song.file.stem),
+            "file_original": str(song.file),
+        }
+        for song in songs_models
+    ]
+    return songs
 
 audio_books_models = list(audiobooks())
 audio_books = [
@@ -66,6 +69,7 @@ audio_books = [
     for album in audio_books_models
 ]
 
+songs = songs_update()
 creative_tonies = tonie_cloud_api.creativetonies()
 
 
@@ -86,9 +90,10 @@ def all_audiobooks():
 
 @app.route("/songs", methods=["GET"])
 def all_songs():
+    songs_local = songs_update()
     return jsonify(
         {
-            "songs": songs,
+            "songs": songs_local,
         }
     )
 
@@ -142,6 +147,28 @@ def delete_track():
         }
     )
 
+@app.route("/download_youtube", methods=["POST"])
+def download_youtube():
+    body = request.json
+    youtube_url = body["youtube_url"]
+
+    ydl_opts = {
+            'format': 'bestaudio/best',
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }],
+            'outtmpl': '/backend/assets/audiobooks/%(title)s.%(ext)s',
+        }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
+    
+    return jsonify(
+        {
+            "status": "success",
+        }
+    )
 
 @dataclass
 class Upload:

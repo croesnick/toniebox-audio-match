@@ -61,17 +61,6 @@ class TonieCloud:
         url = f"households/{tonie.household.id}/creativetonies/{tonie.id}"
         data = self._get(url)
         return data
-        # tracks = [
-        #     AudioTrack(
-        #         id = chapter["id"],
-        #         title=chapter["title"],
-        #         file=chapter["file"],
-        #         seconds=chapter["seconds"],
-        #         duration=chapter["duration"],
-        #     )
-        #     for chapter in data["chapters"]
-        # ]
-        # stats = data[]
         
     def put_album_on_tonie(self, audiobook: AudioBook, tonie: Tonie) -> bool:
         data = {
@@ -114,6 +103,54 @@ class TonieCloud:
 
         return True
 
+
+    def put_songs_on_tonie(self, songs: AudioTrack, tonie: Tonie) -> bool:
+        logger.debug("Test123")
+        data = {
+            "chapters": [
+                {"title": track['file'], "file": self._upload_file(Path(track['file_original']))}
+                for track in sorted(songs, key=lambda t: t["file"])
+            ]
+        }
+
+        logger.debug(data)
+
+        existing_content = self.get_tonie_content(tonie)
+
+        if existing_content:
+            data["chapters"] = data["chapters"] + existing_content['chapters']  
+        
+        logger.debug(
+            data["chapters"])
+
+        
+        response = self.session.patch(
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
+            )                 # logger.debug(
+
+        if not response.ok:
+            logger.error("Something went wrong :'( -> %s", response)
+            return False
+
+        body = response.json()
+
+        logger.info(
+            "Yay! Uploaded songs to tonie %r! Response: %s",
+            tonie.name,
+            response,
+        )
+
+        logger.debug("Transcoding errors: %r", body["transcodingErrors"])
+        logger.debug("Chapters on tonie %r: %r", tonie.name, body["chapters"])
+        logger.debug(
+            "Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"]
+        )
+
+        return True
+
+
     def update_tonie_content(self, tonie: Tonie, tracks) -> bool:
         data = {
                 "chapters": [
@@ -122,7 +159,7 @@ class TonieCloud:
         }
         
         logger.debug(
-            f"Sending songs to tony {data}")
+            f"Updated song list retrieved {data}")
         response = self.session.patch(
             f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
             headers=self.auth_header,
@@ -134,7 +171,7 @@ class TonieCloud:
             return False
 
         logger.info(
-            "Yay! Deleted track %r from tonie %r! Response: %s",
+            "Yay! Files on Tonie updated",
             tracks,
             tonie.name,
             response,
@@ -143,7 +180,7 @@ class TonieCloud:
         return True
 
     def _upload_track(self, track: AudioTrack) -> str:
-        return self._upload_file(track.file)
+        return self._upload_file(track["file"])
 
     def _upload_file(self, file: Path) -> str:
         data = self.session.post(f"{self.url}/file", headers=self.auth_header).json()

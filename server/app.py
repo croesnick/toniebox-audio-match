@@ -49,6 +49,7 @@ songs_models = list(songs())
 songs = [
     {
         "file": str(song.file.stem),
+        "file_original": str(song.file),
     }
     for song in songs_models
 ]
@@ -121,6 +122,7 @@ def delete_track():
     body = request.json
     tonie_id = body["tonie_id"]
     track_id = body["track_id"]
+
     tonie = [tonie for tonie in creative_tonies if tonie.id == tonie_id][0]
 
     current_content = tonie_cloud_api.get_tonie_content(tonie)
@@ -133,10 +135,10 @@ def delete_track():
     return jsonify(
         {
             "status": "success",
-            "tonie": tonie,
+            # "tonie": tonie,
             "tonie_id": tonie_id,
             "track_id": track_id,
-            "new_content": new_content,
+            # "new_content": new_content,
         }
     )
 
@@ -145,6 +147,7 @@ def delete_track():
 class Upload:
     tonie: Tonie
     audiobook: AudioBook
+    track: AudioTrack
 
     @classmethod
     def from_ids(cls, tonie: str, audiobook: str) -> "Upload":
@@ -152,6 +155,14 @@ class Upload:
             next(filter(lambda t: t.id == tonie, creative_tonies), None),
             next(filter(lambda a: a.id == audiobook, audio_books_models), None),
         )
+
+    @classmethod
+    def tracks_from_ids(cls, tonie: Tonie, song: AudioTrack) -> "Upload":
+        return cls(
+                tonie = tonie,
+                audiobook = None,
+                track = song,
+                )
 
 
 @app.route("/upload", methods=["POST"])
@@ -164,6 +175,31 @@ def upload_album_to_tonie():
     return (
         jsonify(
             {"status": "success" if status else "failure", "upload_id": str(upload)}
+        ),
+        201,
+    )
+
+@app.route("/upload_track", methods=["POST"])
+def upload_track_to_tonie():
+    body = request.json;
+    tonie_id = body["tonie_id"];
+    track_id = body["track_ids"];
+    tonie = [to for to in creative_tonies if to.id == tonie_id][0];
+    for track in track_id:
+        song = [so for so in songs if so['file'] == track];
+        upload = Upload.tracks_from_ids(tonie=tonie, song=song)
+        status = tonie_cloud_api.put_songs_on_tonie(upload.track, upload.tonie)
+    # logger.debug(f"Created upload object: {upload}")
+    
+    return (
+        jsonify(
+            {"status": "success",
+             "upload_id": "test",
+             "songs": songs,
+             "track": song,
+             "upload": upload,
+             "return": status,
+             }
         ),
         201,
     )

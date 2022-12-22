@@ -1,6 +1,6 @@
 <template v-if='content'>
   <main role="main">
-    <Tonies :tonies="creativetonies" @onchange="getContent"/>
+    <Tonies :tonies="creativetonies" @onchange="getContent($event)"/>
       <div class="container">
         <div class="row">
           <div class="col">
@@ -87,6 +87,7 @@ export default {
       deleteFromTonie: [],
       uploadToTonie: [],
       songs: [],
+      selectedTonie: String,
     };
   },
   cmp,
@@ -96,7 +97,9 @@ export default {
     },
     getContent(creativeTonie, audiobookID) {
       const path = `${backendUrl}/tonie_overview`;
+      this.selectedTonie = creativeTonie;
       console.log(audiobookID);
+      console.log('creativeTonie', creativeTonie);
       axios.post(path, { tonie_id: creativeTonie })
         .then((res) => {
           this.chapters = res.data.tracks.chapters;
@@ -133,21 +136,27 @@ export default {
       e.preventDefault();
       const path = `${backendUrl}/delete_track`;
       console.log('DeleteFromTonie', this.deleteFromTonie);
-      axios.post(path, { tonie_id: this.tonie, track_id: this.deleteFromTonie })
+      console.log('Tonie', this.selectedTonie);
+      axios.post(path, { tonie_id: this.selectedTonie, track_id: this.deleteFromTonie })
         .then((res) => {
           console.log('res', res);
+          this.getContent(this.selectedTonie);
         })
         .catch((error) => {
           // eslint-disable-next-line
           console.error(error);
         });
     },
-    onSubmitUpload(tonieID, audiobookID) {
-      const path = `${backendUrl}/upload`;
-      axios.post(path, { tonie_id: tonieID, audiobook_id: audiobookID })
+    onSubmitUpload(e) {
+      e.preventDefault();
+      const path = `${backendUrl}/upload_track`;
+      console.log('UploadToTonie', this.uploadToTonie);
+      console.log('Tonie', this.selectedTonie);
+      axios.post(path, { tonie_id: this.selectedTonie, track_ids: this.uploadToTonie })
         .then((res) => {
           // eslint-disable-next-line
-          console.log('Upload id: ' + res.data.upload_id);
+          console.log('res', res);
+          this.getContent(this.selectedTonie);
         })
         .catch((error) => {
           // eslint-disable-next-line

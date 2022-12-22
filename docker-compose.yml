@@ -25,13 +25,13 @@ services:
       - TONIE_AUDIO_MATCH_MEDIA_PATH
       - TONIE_AUDIO_MATCH_USER
       - TONIE_AUDIO_MATCH_PASS
+      - PYTHONUNBUFFERED=0
     command: >
       bash -c "cd /backend &&
       pip install -r requirements.txt &&
       apt-get update &&
       apt-get install -y procps gdb &&
-      python app.py &&
-      bash /backend/start_debugger.sh"
+      python -u app.py"
     networks:
       - toniebox
     ports:

@@ -2,6 +2,8 @@
 
 This is a fork of @croesnick toniebox-audio-match. I moved the original functionality of @croesnick repo to /audiobooks when launching the app. Instead the root url launches a site where you can update the content of your creative tonies by quickly deleting and uploading files from your PC.
 
+It allows easy audio grabbing from youtube via integration with yt-dlp using a textbox you can paste a youtube link into. The file is then automatically added to your local files ready for upload to the tonie.
+
 Your easy management solution for your [creative tonies](https://tonies.com).
 
 ![Example](sample.png)

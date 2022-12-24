@@ -151,13 +151,14 @@ def delete_track():
 def delete_local_track():
     body = request.json
     track_id = body["file"]
-    track = [track for track in songs_update() if track["file"] == track_id[0]][0]
-    os.remove(Path(track["file_original"]))
+
+    track = [track for track in songs_update() if track["file"] in track_id]
+    for t in track:
+        os.remove(Path(t["file_original"]))
 
     return jsonify(
         {
             "status": "success",
-            "track_id": track_id,
         }
     )
 

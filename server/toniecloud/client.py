@@ -46,10 +46,22 @@ class TonieCloud:
             url = f"households/{household.id}/creativetonies"
             data = self._get(url)
             for tonie in data:
-                tonies.append(Tonie(id=tonie["id"], household=household, name=tonie["name"], image=tonie["imageUrl"]))
+                tonies.append(
+                    Tonie(
+                        id=tonie["id"],
+                        household=household,
+                        name=tonie["name"],
+                        image=tonie["imageUrl"],
+                    )
+                )
 
         return tonies
 
+    def get_tonie_content(self, tonie: Tonie) -> List[AudioTrack]:
+        url = f"households/{tonie.household.id}/creativetonies/{tonie.id}"
+        data = self._get(url)
+        return data
+        
     def put_album_on_tonie(self, audiobook: AudioBook, tonie: Tonie) -> bool:
         data = {
             "chapters": [
@@ -58,9 +70,16 @@ class TonieCloud:
             ]
         }
 
-        logger.debug("Sending chapter data from audio book %r to tonie %r: %r", audiobook.album, tonie.name, data)
+        logger.debug(
+            "Sending chapter data from audio book %r to tonie %r: %r",
+            audiobook.album,
+            tonie.name,
+            data,
+        )
         response = self.session.patch(
-            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}", headers=self.auth_header, json=data
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
         )
 
         if not response.ok:
@@ -69,16 +88,99 @@ class TonieCloud:
 
         body = response.json()
 
-        logger.info("Yay! Uploaded album %r to tonie %r! Response: %s", audiobook.album, tonie.name, response)
+        logger.info(
+            "Yay! Uploaded album %r to tonie %r! Response: %s",
+            audiobook.album,
+            tonie.name,
+            response,
+        )
 
         logger.debug("Transcoding errors: %r", body["transcodingErrors"])
         logger.debug("Chapters on tonie %r: %r", tonie.name, body["chapters"])
-        logger.debug("Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"])
+        logger.debug(
+            "Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"]
+        )
+
+        return True
+
+
+    def put_songs_on_tonie(self, songs: AudioTrack, tonie: Tonie) -> bool:
+        logger.debug("Test123")
+        data = {
+            "chapters": [
+                {"title": track['file'], "file": self._upload_file(Path(track['file_original']))}
+                for track in sorted(songs, key=lambda t: t["file"])
+            ]
+        }
+
+        logger.debug(data)
+
+        existing_content = self.get_tonie_content(tonie)
+
+        if existing_content:
+            data["chapters"] = data["chapters"] + existing_content['chapters']  
+        
+        logger.debug(
+            data["chapters"])
+
+        
+        response = self.session.patch(
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
+            )                 # logger.debug(
+
+        if not response.ok:
+            logger.error("Something went wrong :'( -> %s", response)
+            return False
+
+        body = response.json()
+
+        logger.info(
+            "Yay! Uploaded songs to tonie %r! Response: %s",
+            tonie.name,
+            response,
+        )
+
+        logger.debug("Transcoding errors: %r", body["transcodingErrors"])
+        logger.debug("Chapters on tonie %r: %r", tonie.name, body["chapters"])
+        logger.debug(
+            "Seconds remaining on tonie %r: %r", tonie.name, body["secondsRemaining"]
+        )
+
+        return True
+
+
+    def update_tonie_content(self, tonie: Tonie, tracks) -> bool:
+        data = {
+                "chapters": [
+                    {"title": track["title"], "file": track["file"]} for track in tracks 
+                ]
+        }
+        
+        logger.debug(
+            f"Updated song list retrieved {data}")
+        response = self.session.patch(
+            f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
+            headers=self.auth_header,
+            json=data,
+        )
+
+        if not response.ok:
+            logger.error("Something went wrong :'( -> %s", response)
+            return False
+
+        logger.info(
+            "Yay! Files on Tonie updated",
+            tracks,
+            tonie.name,
+            response,
+        )
 
         return True
 
     def _upload_track(self, track: AudioTrack) -> str:
-        return self._upload_file(track.file)
+        return self._upload_file(track["file"])
 
     def _upload_file(self, file: Path) -> str:
         data = self.session.post(f"{self.url}/file", headers=self.auth_header).json()
@@ -89,7 +191,13 @@ class TonieCloud:
         audio_mime_type = mimetypes.guess_type(file)
         logger.debug("Guessed MIME type %r for file %r", audio_mime_type, str(file))
         if audio_mime_type in MIME_TO_CONTENT_TYPE:
-            files = {"file": (data["request"]["fields"]["key"], file.open("rb"), MIME_TO_CONTENT_TYPE[audio_mime_type])}
+            files = {
+                "file": (
+                    data["request"]["fields"]["key"],
+                    file.open("rb"),
+                    MIME_TO_CONTENT_TYPE[audio_mime_type],
+                )
+            }
         else:
             files = {"file": (data["request"]["fields"]["key"], file.open("rb"))}
 
@@ -97,13 +205,17 @@ class TonieCloud:
         if not response.ok:
             raise ValueError("Well, something went wrong. :'(")
 
-        logger.debug("File location: %r, id: %r", response.headers["Location"], data["fileId"])
+        logger.debug(
+            "File location: %r, id: %r", response.headers["Location"], data["fileId"]
+        )
         return data["fileId"]
 
     def _get(self, path: str) -> dict:
         headers = {"Authorization": f"Bearer {self.session.token}"}
 
-        resp = self.session.request("GET", f"{self.url}/{path}", headers=headers, data={})
+        resp = self.session.request(
+            "GET", f"{self.url}/{path}", headers=headers, data={}
+        )
 
         if not resp.ok:
             # TODO Properly handle errors, especially outdated tokens

@@ -1,37 +1,29 @@
----
 version: '3'
 services:
   frontend:
-    image: node:14.7-stretch
+    build:
+      context: ./client
+      dockerfile: Dockerfile
     environment:
       - VUE_APP_BACKEND_SCHEME=${TONIE_AUDIO_MATCH_BACKEND_SCHEME}
       - VUE_APP_BACKEND_HOST=${TONIE_AUDIO_MATCH_BACKEND_HOST}
       - VUE_APP_BACKEND_PORT=${TONIE_AUDIO_MATCH_BACKEND_PORT}
-    command: >
-      bash -c "cd /frontend &&
-      npm install &&
-      npm run serve"
     networks:
       - toniebox
     ports:
       - ${TONIE_AUDIO_MATCH_FRONTEND_PORT}:8080
     volumes:
-      - ./client/:/frontend
       - ./albumart/:/frontend/public/assets/covers
 
   backend:
-    image: python:3.8-buster
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     environment:
       - TONIE_AUDIO_MATCH_MEDIA_PATH
       - TONIE_AUDIO_MATCH_USER
       - TONIE_AUDIO_MATCH_PASS
       - PYTHONUNBUFFERED=0
-    command: >
-      bash -c "cd /backend &&
-      pip install -r requirements.txt &&
-      apt-get update &&
-      apt-get install -y procps gdb &&
-      python -u app.py"
     networks:
       - toniebox
     ports:
@@ -42,7 +34,6 @@ services:
     security_opt:
       - seccomp:unconfined
     volumes:
-      - ./server/:/backend
       - ./albumart/:/backend/assets/covers
       - ${TONIE_AUDIO_MATCH_MEDIA_PATH}:/backend/assets/audiobooks
 

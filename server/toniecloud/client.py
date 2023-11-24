@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import List
 
 from models.audio import AudioBook, AudioTrack
-from models.tonie import Tonie, Household
+from models.tonie import Household, Tonie
 from toniecloud.session import TonieCloudSession
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ class TonieCloud:
         url = f"households/{tonie.household.id}/creativetonies/{tonie.id}"
         data = self._get(url)
         return data
-        
+
     def put_album_on_tonie(self, audiobook: AudioBook, tonie: Tonie) -> bool:
         data = {
             "chapters": [
@@ -103,12 +103,14 @@ class TonieCloud:
 
         return True
 
-
     def put_songs_on_tonie(self, songs: AudioTrack, tonie: Tonie) -> bool:
         logger.debug("Test123")
         data = {
             "chapters": [
-                {"title": track['file'], "file": self._upload_file(Path(track['file_original']))}
+                {
+                    "title": track["file"],
+                    "file": self._upload_file(Path(track["file_original"])),
+                }
                 for track in sorted(songs, key=lambda t: t["file"])
             ]
         }
@@ -118,17 +120,15 @@ class TonieCloud:
         existing_content = self.get_tonie_content(tonie)
 
         if existing_content:
-            data["chapters"] = data["chapters"] + existing_content['chapters']  
-        
-        logger.debug(
-            data["chapters"])
+            data["chapters"] = data["chapters"] + existing_content["chapters"]
 
-        
+        logger.debug(data["chapters"])
+
         response = self.session.patch(
             f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
             headers=self.auth_header,
             json=data,
-            )                 # logger.debug(
+        )  # logger.debug(
 
         if not response.ok:
             logger.error("Something went wrong :'( -> %s", response)
@@ -150,16 +150,14 @@ class TonieCloud:
 
         return True
 
-
     def update_tonie_content(self, tonie: Tonie, tracks) -> bool:
         data = {
-                "chapters": [
-                    {"title": track["title"], "file": track["file"]} for track in tracks 
-                ]
+            "chapters": [
+                {"title": track["title"], "file": track["file"]} for track in tracks
+            ]
         }
-        
-        logger.debug(
-            f"Updated song list retrieved {data}")
+
+        logger.debug(f"Updated song list retrieved {data}")
         response = self.session.patch(
             f"{self.url}/households/{tonie.household.id}/creativetonies/{tonie.id}",
             headers=self.auth_header,

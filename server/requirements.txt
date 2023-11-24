@@ -5,5 +5,7 @@ tinytag ~= 1.5.0
 MarkupSafe == 2.0.1
 # -- debugging
 debugpy
+# -- testing
+pytest
 # -- yt-dlp
 yt-dlp

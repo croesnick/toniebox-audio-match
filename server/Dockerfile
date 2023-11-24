@@ -1,5 +1,5 @@
 # ./server/Dockerfile
-FROM python:3.8-buster
+FROM python:3.8-buster as base
 
 WORKDIR /backend
 
@@ -15,4 +15,12 @@ RUN apt-get update && \
 
 COPY . .
 
-CMD ["python", "-u", "app.py"]
+################ START NEW IMAGE: DEBUG #######################
+FROM base as debug
+
+CMD python -m ptvsd --host 0.0.0.0 --port 5678 --wait --multiprocess -m flask run -h 0.0.0.0 -p 5000
+
+################ START NEW IMAGE: PROD #######################
+FROM base as prod
+
+CMD flask run -h 0.0.0.0 -p 5000

@@ -4,11 +4,10 @@ from dataclasses import dataclass
 from hashlib import sha512
 from io import BytesIO
 from pathlib import Path
-from typing import List, ClassVar, Optional
-
-from tinytag import TinyTag
+from typing import ClassVar, List, Optional
 
 from localstorage.client import audiofiles, metadata
+from tinytag import TinyTag
 
 logger = logging.getLogger(__name__)
 
@@ -57,14 +56,20 @@ class AudioBook:
     def from_path(cls, album: Path) -> Optional["AudioBook"]:
         tracks_files = audiofiles(album)
         if not tracks_files:
-            logger.error("Album without tracks or no tracks with expected extension: %s", album)
+            logger.error(
+                "Album without tracks or no tracks with expected extension: %s", album
+            )
             return None
 
         tracks: List[AudioTrack] = []
 
         for file in tracks_files:
             tags = metadata(file)
-            tracks.append(AudioTrack(album=tags.album, title=tags.title, track=tags.track, file=file))
+            tracks.append(
+                AudioTrack(
+                    album=tags.album, title=tags.title, track=tags.track, file=file
+                )
+            )
 
         if not len({track.album for track in tracks}) == 1:
             print("WARNING De-normalized album title.")
@@ -73,7 +78,9 @@ class AudioBook:
 
         album_id = cls.path_hash(album)
         cover_path = cls.cover_path_for(album_id)
-        cover_path = cls.persist_cover(cover_path, TinyTag.get(str(tracks[0].file), image=True).get_image())
+        cover_path = cls.persist_cover(
+            cover_path, TinyTag.get(str(tracks[0].file), image=True).get_image()
+        )
 
         return cls(
             id=album_id,

@@ -16,14 +16,19 @@ services:
       - ./albumart/:/frontend/public/assets/covers
 
   backend:
+    stdin_open: true
+    tty: true
     build:
       context: ./server
       dockerfile: Dockerfile
+      target: prod
     environment:
       - TONIE_AUDIO_MATCH_MEDIA_PATH
       - TONIE_AUDIO_MATCH_USER
       - TONIE_AUDIO_MATCH_PASS
       - PYTHONUNBUFFERED=0
+      - FLASK_ENV=development
+      - PYTHONPATH=/backend
     networks:
       - toniebox
     ports:
@@ -36,6 +41,7 @@ services:
     volumes:
       - ./albumart/:/backend/assets/covers
       - ${TONIE_AUDIO_MATCH_MEDIA_PATH}:/backend/assets/audiobooks
+      - ./server:/backend
 
 networks:
   toniebox:

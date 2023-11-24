@@ -37,4 +37,10 @@ def metadata(file: Path) -> AudioTag:
     tags = TinyTag.get(str(file))
     logger.debug("Fetched metadata for file '%s': %s", file, tags)
 
-    return AudioTag(album=tags.album, artist=tags.albumartist, title=tags.title, track=tags.track, disc=tags.disc)
+    return AudioTag(
+        album=tags.album,
+        artist=tags.albumartist,
+        title=tags.title,
+        track=tags.track,
+        disc=tags.disc,
+    )

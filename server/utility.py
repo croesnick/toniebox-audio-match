@@ -2,11 +2,10 @@ import os
 from pathlib import Path
 
 import localstorage.client
+from config import Config
 from flask import g
 from models.audio import AudioBook, AudioTrack
 from toniecloud.client import TonieCloud
-
-from server.config import Config
 
 tonie_api_client = None
 

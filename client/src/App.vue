@@ -33,6 +33,9 @@
 .btn-danger {
   background-color: #dc3545;
   color: white;
+  margin-right: 5px;
+
+
 }
 
 .btn-danger:hover {
@@ -43,6 +46,7 @@
 .btn-success {
   background-color: #28a745;
   color: white;
+  margin-right: 5px;
 }
 
 .btn-success:hover {
@@ -54,6 +58,7 @@
   background-color: transparent;
   color: #6c757d;
   border: 1px solid #6c757d;
+  padding: 0.375rem 1.25rem;
 }
 
 .btn-outline-secondary:hover {
@@ -64,6 +69,7 @@
 .btn-primary {
   background-color: #007bff;
   color: white;
+  margin-right: 5px;
 }
 
 .btn-primary:hover {
@@ -77,6 +83,7 @@
   border: 2px solid #ced4da;
   padding: 0.625rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  margin-right: 5px;
 }
 
 .input-group .form-control:focus {
@@ -97,7 +104,8 @@
 /* Checkbox Enhancement */
 .form-check-input {
   margin-top: 0.3rem;
-  margin-right: 0.5rem;
+  margin-right: 0.2rem;
+  margin-left: -1rem;
   cursor: pointer;
 }
 
@@ -148,4 +156,21 @@
   background-color: #f8f9fa;
   transform: scale(1.02); /* subtle scale effect on hover */
 }
+
+.info-box {
+    border: 1px solid #fff; /* Change color as needed */
+    padding: 10px;
+    margin-bottom: 20px; /* Adjust as needed for spacing */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Optional: for subtle shadow */
+    background-color: #2a36b4; /* Change color as needed (match your UI theme) */
+    color: #fff; /* Text color */
+    border-radius: 5px; /* Optional: if you want rounded corners */
+}
+
+.info-box span {
+    display: block; /* Makes each span take the full width */
+    text-align: left; /* Align text to the left if that fits your design */
+    margin-bottom: 5px; /* Space out the lines */
+}
+
 </style>

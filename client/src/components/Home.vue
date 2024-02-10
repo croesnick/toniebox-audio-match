@@ -17,9 +17,11 @@
         <div class="col">
           <!-- Delete form  s-->
           <form @submit="onSubmit" method="post" v-if="content">
-            <span v-if="chapters.length">Minutes Remaining on Tonie:
-              {{ Math.floor(content.tracks.secondsRemaining / 60) }}</span>
-            <div v-if="chapters.length">Total Runtime: {{ formatTime(totalRuntime) }}</div>
+            <div v-if="chapters.length" class="info-box">
+              <span>Minutes Remaining on Tonie:
+                {{ Math.floor(content.tracks.secondsRemaining / 60) }}</span>
+              <div>Total Runtime: {{ formatTime(totalRuntime) }}</div>
+            </div>
             <div v-for="track in chapters" :key="track.id" class="col-md-11">
               <label class="list-group-item gap-3">
                 <input class="form-check-input" type="checkbox" v-bind:value="track.id" style="font-size: 0.375em;"
@@ -29,7 +31,7 @@
                     <strong>{{ track.title }}</strong>
                   </div>
                   <div v-else>
-                    <strong>{{ track.title.substring(0, 20) }}...</strong>
+                    <strong>{{ track.title.substring(0, 30) }}...</strong>
                   </div>
                   <small class="text-muted">
                     <svg class="bi me-1" width="1em" height="1em">
@@ -66,9 +68,9 @@
                 </span>
               </label>
             </div>
-            <button type="submit" class="btn btn-success">Upload Selected Files</button>
-            <button type="button" class="btn btn-primary" @click="Refresh">Refresh</button>
-            <button type="button" class="btn btn-danger" @click="deleteLocalTrack">Delete Local Tracks</button>
+            <button type="submit" class="btn btn-success me-2">Upload Selected Files</button>
+            <button type="button" class="btn btn-primary me-2" @click="Refresh">Refresh</button>
+            <button type="button" class="btn btn-danger me-2" @click="deleteLocalTrack">Delete Local Tracks</button>
           </form>
         </div>
       </div>

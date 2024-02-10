@@ -1,10 +1,12 @@
 <template>
-  <select class="form-control" @change="tonieSelected">
+  <div class="dropdown-container">
+  <select class="form-control dropdown" @change="tonieSelected">
     <option selected disabled>Wähle deinen Tonie</option>
     <option v-for="tonie in tonies" :key="tonie.id" :value="tonie.id">
       {{ tonie.name }}
     </option>
   </select>
+  </div>
 </template>
 
 <script>

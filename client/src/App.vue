@@ -92,6 +92,17 @@
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
 }
 
+.dropdown {
+  max-width: 40%;
+  background-color: darkolivegreen;
+}
+
+.dropdown-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
 /* Container and Row Enhancements for better spacing */
 .container {
   padding: 20px;
@@ -103,7 +114,7 @@
 
 /* Checkbox Enhancement */
 .form-check-input {
-  margin-top: 0.3rem;
+  margin-top: 1.5rem;
   margin-right: 0.2rem;
   margin-left: -1rem;
   cursor: pointer;
@@ -162,7 +173,7 @@
     padding: 10px;
     margin-bottom: 20px; /* Adjust as needed for spacing */
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Optional: for subtle shadow */
-    background-color: #2a36b4; /* Change color as needed (match your UI theme) */
+    background-color: #696a76; /* Change color as needed (match your UI theme) */
     color: #fff; /* Text color */
     border-radius: 5px; /* Optional: if you want rounded corners */
 }
@@ -173,4 +184,8 @@
     margin-bottom: 5px; /* Space out the lines */
 }
 
+.center-text {
+  text-align: center;
+  margin-bottom: 10px;
+}
 </style>

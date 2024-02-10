@@ -57,8 +57,10 @@
               <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Download</button>
             </div>
           </form>
+          <progress max="100" :value="downloadProgress" v-if="isDownloading"></progress>
           <!-- Upload form -->
           <form @submit="onSubmitUpload" method="post" v-if="content">
+            <div v-if="songs.length == 0" class="center-text"><strong>No local files</strong></div> 
             <div v-for="song in songs" :key="song.file" class="col-md-11">
               <label class="list-group-item gap-3">
                 <input class="form-check-input" type="checkbox" v-bind:value="song.file" style="font-size: 0.375em;"
@@ -68,9 +70,9 @@
                 </span>
               </label>
             </div>
-            <button type="submit" class="btn btn-success me-2">Upload Selected Files</button>
+            <button type="submit" class="btn btn-success me-2" v-if="songs.length > 0">Upload Selected Files</button>
             <button type="button" class="btn btn-primary me-2" @click="Refresh">Refresh</button>
-            <button type="button" class="btn btn-danger me-2" @click="deleteLocalTrack">Delete Local Tracks</button>
+            <button type="button" class="btn btn-danger me-2" @click="deleteLocalTrack" v-if="songs.length > 0">Delete Local Tracks</button>
           </form>
         </div>
       </div>
@@ -129,6 +131,7 @@ export default {
       songs: [],
       youtubeUrl: '',
       selectedTonie: String,
+      isDownloading: false,
     };
   },
   cmp,
@@ -254,16 +257,19 @@ export default {
      */
     downloadYoutube(e) {
       e.preventDefault();
+      this.isDownloading = true;
       const path = `${backendUrl}/download_youtube`;
       console.log('DownloadYoutube', this.youtubeUrl);
       axios.post(path, { youtube_url: this.youtubeUrl })
         .then((res) => {
           // eslint-disable-next-line
           console.log('res', res);
+          this.isDownloading = false;
           this.getAudioOnDisk();
         })
         .catch((error) => {
           // eslint-disable-next-line
+          this.isDownloading = false;
           console.error(error);
         });
     },
